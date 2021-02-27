@@ -11,6 +11,11 @@ export class DtoConverterService {
 
     questionnaireDtoToEntity(qdto: QuestionnaireDto): Questionnaire {
         const questionnaire = new Questionnaire();
+
+        // new questionnaires don't have an id yet
+        if(!(qdto.id === undefined)) {
+            questionnaire.id = qdto.id;
+        }
         questionnaire.title = qdto.title;
         questionnaire.createdAt = qdto.createdAt;
         questionnaire.questions = [];

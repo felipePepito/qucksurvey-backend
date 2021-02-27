@@ -1,6 +1,14 @@
-import { Answer } from './answer';
+import { AnswerDto } from './answer.dto';
+import {Question} from "../entities/question.entity";
+import {IsArray, IsString, ValidateNested} from "class-validator";
+import {Type} from "class-transformer";
 
-export interface QuestionDto {
+export class QuestionDto {
+  @IsString()
   text: string;
-  answers: Array<Answer>;
+
+  @IsArray()
+  @ValidateNested({each: true})
+  @Type(() => AnswerDto)
+  answers: Array<AnswerDto>;
 }
