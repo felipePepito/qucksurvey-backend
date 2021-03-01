@@ -15,6 +15,8 @@ export class Question {
     })
     answers: Array<Answer>;
 
-    @ManyToOne(() => Questionnaire, questionnaire => questionnaire.questions)
+    @ManyToOne(() => Questionnaire, questionnaire => questionnaire.questions, {
+        onDelete: 'CASCADE'
+    })
     questionnaire: Questionnaire;
 }

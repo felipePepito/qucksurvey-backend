@@ -1,10 +1,18 @@
-import {Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post} from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    ParseIntPipe,
+    Post
+} from '@nestjs/common';
 
 import {QuestionnaireService} from "../../../services/questionnaire.service";
 import {Questionnaire} from "../../../entities/questionnaire.entity";
 import {QuestionnaireDto} from "../../../dto/questionnaire.dto";
 import {DtoConverterService} from "../../dto-converter/dto-converter.service";
-import {AnswerDto} from "../../../dto/answer.dto";
 
 @Controller('edit')
 export class EditController {
@@ -31,17 +39,22 @@ export class EditController {
 
     @Post('update')
     async update(@Body() qdto: QuestionnaireDto) {
+        // existence of id is not validated via class-validator, therefore validated here
         if(qdto.id === undefined) {
-            throw new HttpException("Halt die Fresse.", HttpStatus.BAD_REQUEST);
+            throw new BadRequestException();
         }
 
-        await this.questionnaireService.update(this.dtoConverterService.questionnaireDtoToEntity(qdto)).catch(
-            reject => { throw new HttpException("Questionnaire doesn't exist", HttpStatus.BAD_REQUEST)}
-        );
+        await this.questionnaireService.update(this.dtoConverterService.questionnaireDtoToEntity(qdto))
+            .catch(
+                reason => { throw reason; }
+            );
     }
 
-    // @Delete('delete')
-    // delete(id: number) {
-    //
-    // }
+    @Delete(':id')
+    async delete(@Param('id', ParseIntPipe) id: number) {
+        await this.questionnaireService.delete(id)
+            .catch(
+                reason => { throw reason; }
+            )
+    }
 }

@@ -1,4 +1,9 @@
-import {HttpException, HttpStatus, Injectable, OnModuleInit} from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    InternalServerErrorException,
+    OnModuleInit
+} from '@nestjs/common';
 import {Questionnaire} from "../entities/questionnaire.entity";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
@@ -33,27 +38,34 @@ export class QuestionnaireService implements OnModuleInit{
     }
 
     update(questionnaire: Questionnaire): Promise<void> {
-        return new Promise<void> ((resolve, reject) => {
-            this.questionnaireRepository.findOne(questionnaire.id).then(
-                result => {
-                    if (result === undefined) {
-                        reject();
-                    } else {
-                        this.questionnaireRepository.save(questionnaire);
-                        resolve();
-                    }
-                }
-            );
-        })
-        // make sure questionnaire with given id already exists in database
-
-
+        return this.questionnaireRepository.findOne(questionnaire.id)
+            .then(result => {
+                if (result === undefined) throw new BadRequestException();
+                return this.questionnaireRepository.save(questionnaire)
+                    .then(value => {})
+                    .catch(reason => {
+                        throw new InternalServerErrorException();
+                    });
+            });
     }
 
-    //     const index =this.questionnaires.indexOf(this.questionnaires.find(q => q.id === questionnaire.id));
-    //     this.questionnaires.splice(index, 1, questionnaire);
-    //
-    // delete(id: number) {
-    //     this.questionnaires.splice(id, 1);
-    // }
+    delete(idQuestionnaire: number): Promise<void> {
+        return this.questionnaireRepository.findOne(idQuestionnaire)
+            .then(
+                result => {
+                    if(result === undefined) throw new BadRequestException();
+                    return this.questionnaireRepository.remove(result)
+                        .then(
+                            value => {},
+                            reason => {
+                                throw new InternalServerErrorException();
+                            }
+                        );
+                },
+                reason => {
+                    throw new InternalServerErrorException();
+                }
+            );
+    }
+
 }
